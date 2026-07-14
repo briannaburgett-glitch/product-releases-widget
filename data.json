@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-07-13T00:00:00Z",
+ "updatedAt": "2026-07-14T00:00:00Z",
  "releases": [
   {
    "id": "r1",
@@ -27,6 +27,32 @@
     "NIPR": {"color": "green", "note": ""},
     "SIPR": {"color": "orange", "note": "Delayed due to CtF"},
     "JWICS": {"color": "orange", "note": "Delayed due to CtF"}
+   }
+  }
+ ],
+ "dev": [
+  {
+   "id": "d1",
+   "title": "Approvals",
+   "video": "",
+   "sheet": "",
+   "slack": "",
+   "status": {
+    "Assigned": {"color": "gray", "note": ""},
+    "On Dev": {"color": "gray", "note": ""},
+    "On App (FF)": {"color": "gray", "note": ""}
+   }
+  },
+  {
+   "id": "d2",
+   "title": "AI Assist",
+   "video": "",
+   "sheet": "",
+   "slack": "",
+   "status": {
+    "Assigned": {"color": "gray", "note": ""},
+    "On Dev": {"color": "gray", "note": ""},
+    "On App (FF)": {"color": "gray", "note": ""}
    }
   }
  ]
