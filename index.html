@@ -39,14 +39,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .add-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:none;background:#378ADD;color:#fff;cursor:pointer;}
 .ghost-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;}
 .ghost-btn:hover{color:var(--text);}
-.sync-badge{font-size:9px;padding:2px 9px;border-radius:14px;font-weight:500;}
-.sync-clean{background:var(--green-bg);color:var(--green);}
-.sync-dirty{background:var(--amber-bg);color:var(--amber);}
 .rel-desc{font-size:12px;color:var(--text2);line-height:1.7;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border);padding:.9rem 1rem;margin-bottom:1.25rem;}
-/* Release grid */
+/* Feature grid */
 .rel-header{display:grid;grid-template-columns:minmax(180px,1fr) repeat(4,90px);gap:8px;align-items:center;padding:0 4px 8px;border-bottom:0.5px solid var(--border);margin-bottom:4px;}
+.rel-header.cols-3{grid-template-columns:minmax(180px,1fr) repeat(3,100px);}
 .rel-header .net-label{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);text-align:center;}
 .rel-row{display:grid;grid-template-columns:minmax(180px,1fr) repeat(4,90px);gap:8px;align-items:center;padding:10px 4px;border-bottom:0.5px solid var(--border);}
+.rel-row.cols-3{grid-template-columns:minmax(180px,1fr) repeat(3,100px);}
 .rel-row:hover{background:var(--bg2);}
 .rel-pill{font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:0.5px solid transparent;cursor:pointer;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .rel-pill:hover{border-color:var(--blue);}
@@ -71,6 +70,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .detail-save{font-size:10px;padding:3px 10px;border-radius:14px;border:none;background:#378ADD;color:#fff;cursor:pointer;margin-top:4px;margin-right:4px;}
 .detail-cancel{font-size:10px;padding:3px 10px;border-radius:14px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;margin-top:4px;}
 .slack-chip{display:inline-block;font-size:11px;padding:2px 9px;border-radius:14px;background:var(--purple-bg);color:var(--purple);font-weight:500;}
+.pdf-btn{display:inline-block;font-size:11px;padding:3px 12px;border-radius:14px;background:var(--green-bg);color:var(--green);font-weight:500;text-decoration:none!important;}
+.pdf-btn:hover{opacity:.8;}
 /* Status popup */
 .color-picker{display:flex;gap:10px;margin:8px 0 12px;}
 .color-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
@@ -94,6 +95,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .export-area{width:100%;font-size:10px;font-family:monospace;padding:8px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);min-height:140px;resize:vertical;}
 @media(max-width:600px){
   .rel-header,.rel-row{grid-template-columns:minmax(110px,1fr) repeat(4,44px);gap:4px;}
+  .rel-header.cols-3,.rel-row.cols-3{grid-template-columns:minmax(110px,1fr) repeat(3,56px);}
   .rel-pill{font-size:11px;padding:4px 10px;}
 }
 </style>
@@ -102,6 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="tab-bar">
   <button class="tab active" id="tab-btn-releases" onclick="showTab('releases',this)">Recent Releases</button>
+  <button class="tab" id="tab-btn-dev" onclick="showTab('dev',this)">In Development</button>
 </div>
 
 <!-- RELEASES -->
@@ -109,16 +112,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="toolbar">
     <span class="section-label" style="margin:0;">Significant product releases - network availability</span>
     <div class="toolbar-btns">
-      <span class="sync-badge sync-clean" id="sync-badge" style="display:none;"></span>
       <button class="ghost-btn" onclick="openExportModal()">Publish / Export</button>
-      <button class="ghost-btn" onclick="resetToPublished()">Reset</button>
-      <button class="add-btn" onclick="openRelModal()">+ Add release</button>
+      <button class="add-btn" onclick="openAddModal('releases')">+ Add feature</button>
     </div>
   </div>
-  <div class="rel-desc">Tracks each significant product release and its live status across networks. Click a release name for the demo video, release notes, marketing slick sheet, and Slack feedback channel. Click any status dot to update its color or add a status note. Edits are local until published; use Publish / Export to update the shared view for everyone.</div>
+  <div class="rel-desc">Tracks each significant feature release and its live status across networks. Click a feature name for the demo video, release notes, marketing slick sheet, and Slack feedback channel. Click any status dot to update its color or add a status note.</div>
   <div class="rel-table">
     <div class="rel-header">
-      <span class="section-label" style="margin:0;">Release</span>
+      <span class="section-label" style="margin:0;">Feature</span>
       <span class="net-label">App</span>
       <span class="net-label">NIPR</span>
       <span class="net-label">SIPR</span>
@@ -134,14 +135,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- RELEASE DETAIL MODAL -->
+<!-- IN DEVELOPMENT -->
+<div id="tab-dev" class="panel">
+  <div class="toolbar">
+    <span class="section-label" style="margin:0;">Features in development - progress status</span>
+    <div class="toolbar-btns">
+      <button class="ghost-btn" onclick="openExportModal()">Publish / Export</button>
+      <button class="add-btn" onclick="openAddModal('dev')">+ Add feature</button>
+    </div>
+  </div>
+  <div class="rel-desc">Tracks features currently in development. Click a feature name for the demo video, Slack feedback channel, and marketing slick sheet. Click any status dot to update its color or add a status note.</div>
+  <div class="rel-table">
+    <div class="rel-header cols-3">
+      <span class="section-label" style="margin:0;">Feature</span>
+      <span class="net-label">Assigned</span>
+      <span class="net-label">On Dev</span>
+      <span class="net-label">On App (FF)</span>
+    </div>
+    <div id="dev-list"></div>
+  </div>
+  <div class="rel-legend">
+    <div class="li"><div class="ld" style="background:var(--dot-green);"></div>Complete / live</div>
+    <div class="li"><div class="ld" style="background:var(--dot-orange);"></div>In progress / delayed</div>
+    <div class="li"><div class="ld" style="background:var(--dot-red);"></div>Blocked</div>
+    <div class="li"><div class="ld" style="background:var(--dot-gray);"></div>Not started</div>
+  </div>
+</div>
+
+<!-- FEATURE DETAIL MODAL -->
 <div class="modal-backdrop" id="detail-modal">
   <div class="modal">
-    <h3 id="detail-title">Release details</h3>
-    <div class="modal-sub">Click Edit next to any field to update it.</div>
+    <h3 id="detail-title">Feature details</h3>
+    <div class="modal-sub">Click Edit next to any field to update it. Changes save automatically.</div>
     <div id="detail-fields"></div>
     <div class="modal-actions">
-      <button class="btn-danger" onclick="deleteRelease()">Delete release</button>
+      <button class="btn-danger" onclick="deleteFeature()">Delete feature</button>
       <button class="btn-cancel" onclick="closeModal('detail-modal')">Close</button>
     </div>
   </div>
@@ -162,18 +190,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- ADD RELEASE MODAL -->
-<div class="modal-backdrop" id="rel-modal">
+<!-- ADD FEATURE MODAL -->
+<div class="modal-backdrop" id="add-modal">
   <div class="modal">
-    <h3>Add release</h3>
-    <div class="form-row"><label class="form-label">Release title</label><input class="form-input" id="rel-title-input" placeholder="e.g. AI Assist v2"></div>
-    <div class="form-row"><label class="form-label">Demo video URL (optional)</label><input class="form-input" id="rel-video-input" placeholder="https://..."></div>
-    <div class="form-row"><label class="form-label">Release notes URL (optional)</label><input class="form-input" id="rel-notes-input" placeholder="https://..."></div>
-    <div class="form-row"><label class="form-label">Marketing slick sheet URL (optional)</label><input class="form-input" id="rel-sheet-input" placeholder="https://..."></div>
-    <div class="form-row"><label class="form-label">Slack channel (optional)</label><input class="form-input" id="rel-slack-input" placeholder="#release-feedback"></div>
+    <h3>Add feature</h3>
+    <div class="form-row"><label class="form-label">Feature title</label><input class="form-input" id="add-title-input" placeholder="e.g. AI Assist v2"></div>
+    <div class="form-row"><label class="form-label">Demo video URL (optional)</label><input class="form-input" id="add-video-input" placeholder="https://..."></div>
+    <div class="form-row" id="add-notes-row"><label class="form-label">Release notes URL (optional)</label><input class="form-input" id="add-notes-input" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">Marketing slick sheet PDF link (optional)</label><input class="form-input" id="add-sheet-input" placeholder="https://... (Drive/Notion/SharePoint link to PDF)"></div>
+    <div class="form-row"><label class="form-label">Slack channel (optional)</label><input class="form-input" id="add-slack-input" placeholder="#release-feedback"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('rel-modal')">Cancel</button>
-      <button class="btn-save" onclick="saveNewRelease()">Save</button>
+      <button class="btn-cancel" onclick="closeModal('add-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveNewFeature()">Save</button>
     </div>
   </div>
 </div>
@@ -182,7 +210,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="modal-backdrop" id="export-modal">
   <div class="modal">
     <h3>Publish your edits</h3>
-    <div class="modal-sub">This JSON is your current working copy. To publish it for everyone: copy it, open data.json in the GitHub repo, replace the entire file contents, and commit. The embed updates for all viewers within a couple of minutes.</div>
+    <div class="modal-sub">This JSON is your current working copy (both tabs). To publish for everyone: copy it, open data.json in the GitHub repo, replace the entire file contents, and commit. The embed updates for all viewers within a couple of minutes.</div>
     <textarea class="export-area" id="export-area" readonly></textarea>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('export-modal')">Close</button>
@@ -193,30 +221,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-var NETWORKS=["App","NIPR","SIPR","JWICS"];
+var SECTIONS={
+  releases:{
+    listEl:'rel-list',
+    columns:["App","NIPR","SIPR","JWICS"],
+    rowClass:'',
+    fields:[
+      {key:"video",label:"Demo Video",type:"url"},
+      {key:"notes",label:"Release Notes",type:"url"},
+      {key:"sheet",label:"Marketing Slick Sheet (PDF, approved for external use)",type:"pdf"},
+      {key:"slack",label:"Slack Channel for Questions / Feedback",type:"text"}
+    ]
+  },
+  dev:{
+    listEl:'dev-list',
+    columns:["Assigned","On Dev","On App (FF)"],
+    rowClass:' cols-3',
+    fields:[
+      {key:"video",label:"Demo Video",type:"url"},
+      {key:"slack",label:"Slack Channel for Questions / Feedback",type:"text"},
+      {key:"sheet",label:"Marketing Slick Sheet (PDF)",type:"pdf"}
+    ]
+  }
+};
 var COLORS=["green","orange","red","gray"];
 var COLOR_VALS={green:"var(--dot-green)",orange:"var(--dot-orange)",red:"var(--dot-red)",gray:"var(--dot-gray)"};
-var LS_KEY='prodrel_local';
+var LS_KEY='prodrel_local_v2';
 
 // Fallback only used if data.json cannot be fetched (e.g. local file preview)
 var FALLBACK={
-  updatedAt:"2026-07-13T00:00:00Z",
+  updatedAt:"2026-07-14T00:00:00Z",
   releases:[
     {id:"r1",title:"Foundry Integration",video:"",notes:"",sheet:"",slack:"",
      status:{"App":{color:"green",note:""},"NIPR":{color:"green",note:""},"SIPR":{color:"green",note:""},"JWICS":{color:"red",note:"Delayed due to CtF"}}},
     {id:"r2",title:"POAM",video:"",notes:"",sheet:"",slack:"",
      status:{"App":{color:"green",note:""},"NIPR":{color:"green",note:""},"SIPR":{color:"orange",note:"Delayed due to CtF"},"JWICS":{color:"orange",note:"Delayed due to CtF"}}}
+  ],
+  dev:[
+    {id:"d1",title:"Approvals",video:"",sheet:"",slack:"",
+     status:{"Assigned":{color:"gray",note:""},"On Dev":{color:"gray",note:""},"On App (FF)":{color:"gray",note:""}}},
+    {id:"d2",title:"AI Assist",video:"",sheet:"",slack:"",
+     status:{"Assigned":{color:"gray",note:""},"On Dev":{color:"gray",note:""},"On App (FF)":{color:"gray",note:""}}}
   ]
 };
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-var releases=[];
-var publishedVersion=null;   // updatedAt of the data.json this session is based on
-var isDirty=false;           // local edits not yet published
-var activeRelId=null;
+var data={releases:[],dev:[]};
+var publishedVersion=null;
+var activeSection=null;      // 'releases' | 'dev' — section of the item currently open
+var activeFeatId=null;
 var editingField=null;
-var statusTarget=null;
+var statusTarget=null;       // {section, featId, column}
 var statusColorSel=null;
+var addTargetSection='releases';
 
 function lsGet(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -231,50 +288,26 @@ document.querySelectorAll(".modal-backdrop").forEach(function(m){
 });
 
 // ── DATA LOADING ──────────────────────────────────────────────────────────────
-// Published truth lives in data.json (committed to the repo).
-// Local unpublished edits live in localStorage as {baseVersion, releases}.
-// Rules: if local edits are based on the current published version, keep them.
-// If published has moved on (new commit), adopt published and drop stale local copy.
 function boot(published){
   publishedVersion=published.updatedAt||null;
   var local=lsGet(LS_KEY,null);
-  if(local&&local.baseVersion===publishedVersion&&Array.isArray(local.releases)){
-    releases=local.releases;
-    isDirty=true;
+  if(local&&local.baseVersion===publishedVersion&&local.data){
+    data={releases:local.data.releases||[],dev:local.data.dev||[]};
   }else{
-    releases=published.releases||[];
+    data={releases:published.releases||[],dev:published.dev||[]};
     lsDel(LS_KEY);
-    isDirty=false;
   }
-  renderReleases();
-  renderSyncBadge();
+  renderSection('releases');
+  renderSection('dev');
 }
 
 fetch('./data.json?t='+Date.now())
   .then(function(r){if(!r.ok)throw new Error('fetch failed');return r.json();})
-  .then(function(data){boot(data);})
+  .then(function(d){boot(d);})
   .catch(function(){boot(FALLBACK);});
 
-function markDirty(){
-  isDirty=true;
-  lsSet(LS_KEY,{baseVersion:publishedVersion,releases:releases});
-  renderSyncBadge();
-}
-function renderSyncBadge(){
-  var b=document.getElementById('sync-badge');
-  b.style.display='inline-block';
-  if(isDirty){
-    b.className='sync-badge sync-dirty';
-    b.textContent='Unpublished edits';
-  }else{
-    b.className='sync-badge sync-clean';
-    b.textContent='In sync with published';
-  }
-}
-function resetToPublished(){
-  if(isDirty&&!confirm('Discard your local unpublished edits and reload the published version?'))return;
-  lsDel(LS_KEY);
-  location.reload();
+function persist(){
+  lsSet(LS_KEY,{baseVersion:publishedVersion,data:data});
 }
 
 // ── TAB NAV ───────────────────────────────────────────────────────────────────
@@ -285,34 +318,36 @@ function showTab(name,btn){
   btn.classList.add("active");
 }
 
-// ── RELEASE GRID ──────────────────────────────────────────────────────────────
-function renderReleases(){
-  var el=document.getElementById('rel-list');
-  if(!releases.length){
-    el.innerHTML='<div class="empty-state">No releases tracked yet.<br>Hit "+ Add release" to add your first one.</div>';
+// ── GRID RENDERING (shared) ──────────────────────────────────────────────────
+function renderSection(section){
+  var cfg=SECTIONS[section];
+  var items=data[section];
+  var el=document.getElementById(cfg.listEl);
+  if(!items.length){
+    el.innerHTML='<div class="empty-state">No features tracked yet.<br>Hit "+ Add feature" to add your first one.</div>';
     return;
   }
-  el.innerHTML=releases.map(function(r){
-    var dots=NETWORKS.map(function(n){
-      var st=(r.status&&r.status[n])||{color:"gray",note:""};
+  el.innerHTML=items.map(function(f){
+    var dots=cfg.columns.map(function(c){
+      var st=(f.status&&f.status[c])||{color:"gray",note:""};
       var noteCls=st.note?' dot-has-note':'';
       return '<div class="dot-cell"><div class="status-dot-lg'+noteCls+'" style="background:'+COLOR_VALS[st.color]+';" '
-        +'onclick="openStatusModal(\''+r.id+'\',\''+n+'\')" title="'+escAttr(st.note||n+' status')+'"></div></div>';
+        +'onclick="openStatusModal(\''+section+'\',\''+f.id+'\',\''+escAttr(c)+'\')" title="'+escAttr(st.note||c+' status')+'"></div></div>';
     }).join('');
-    return '<div class="rel-row">'
-      +'<div><span class="rel-pill" onclick="openDetailModal(\''+r.id+'\')">'+escHtml(r.title)+'</span></div>'
+    return '<div class="rel-row'+cfg.rowClass+'">'
+      +'<div><span class="rel-pill" onclick="openDetailModal(\''+section+'\',\''+f.id+'\')">'+escHtml(f.title)+'</span></div>'
       +dots
       +'</div>';
   }).join('');
 }
 
 // ── STATUS MODAL ──────────────────────────────────────────────────────────────
-function openStatusModal(relId,network){
-  var r=releases.find(function(x){return x.id===relId;});if(!r)return;
-  statusTarget={relId:relId,network:network};
-  var st=(r.status&&r.status[network])||{color:"gray",note:""};
+function openStatusModal(section,featId,column){
+  var f=data[section].find(function(x){return x.id===featId;});if(!f)return;
+  statusTarget={section:section,featId:featId,column:column};
+  var st=(f.status&&f.status[column])||{color:"gray",note:""};
   statusColorSel=st.color;
-  document.getElementById('status-title').textContent=r.title+' - '+network;
+  document.getElementById('status-title').textContent=f.title+' - '+column;
   document.getElementById('status-note').value=st.note||'';
   renderColorPicker();
   document.getElementById('status-modal').classList.add('open');
@@ -328,51 +363,48 @@ function selectColor(c){
   renderColorPicker();
 }
 function saveStatus(){
-  var r=releases.find(function(x){return x.id===statusTarget.relId;});if(!r)return;
-  if(!r.status)r.status={};
-  r.status[statusTarget.network]={color:statusColorSel,note:document.getElementById('status-note').value.trim()};
-  markDirty();
+  var f=data[statusTarget.section].find(function(x){return x.id===statusTarget.featId;});if(!f)return;
+  if(!f.status)f.status={};
+  f.status[statusTarget.column]={color:statusColorSel,note:document.getElementById('status-note').value.trim()};
+  persist();
   closeModal('status-modal');
-  renderReleases();
+  renderSection(statusTarget.section);
 }
 
-// ── DETAIL MODAL ──────────────────────────────────────────────────────────────
-var FIELD_DEFS=[
-  {key:"video",label:"Demo Video",type:"url"},
-  {key:"notes",label:"Release Notes",type:"url"},
-  {key:"sheet",label:"Marketing Slick Sheet (approved for external use)",type:"url"},
-  {key:"slack",label:"Slack Channel for Questions / Feedback",type:"text"}
-];
-
-function openDetailModal(relId){
-  activeRelId=relId;
+// ── DETAIL MODAL (shared, fields driven by section config) ──────────────────
+function openDetailModal(section,featId){
+  activeSection=section;
+  activeFeatId=featId;
   editingField=null;
   renderDetail();
   document.getElementById('detail-modal').classList.add('open');
 }
 function renderDetail(){
-  var r=releases.find(function(x){return x.id===activeRelId;});if(!r)return;
-  document.getElementById('detail-title').textContent=r.title;
+  var f=data[activeSection].find(function(x){return x.id===activeFeatId;});if(!f)return;
+  document.getElementById('detail-title').textContent=f.title;
   var el=document.getElementById('detail-fields');
-  el.innerHTML=FIELD_DEFS.map(function(f){
-    var val=r[f.key]||'';
-    if(editingField===f.key){
-      return '<div class="detail-field"><label class="detail-label">'+f.label+'</label>'
-        +'<input class="detail-input" id="detail-input-'+f.key+'" value="'+escAttr(val)+'" placeholder="'+(f.type==='url'?'https://...':'#channel-name')+'">'
-        +'<div><button class="detail-save" onclick="saveDetailField(\''+f.key+'\')">Save</button>'
+  el.innerHTML=SECTIONS[activeSection].fields.map(function(fd){
+    var val=f[fd.key]||'';
+    if(editingField===fd.key){
+      var ph=fd.type==='text'?'#channel-name':'https://... '+(fd.type==='pdf'?'(link to the PDF)':'');
+      return '<div class="detail-field"><label class="detail-label">'+fd.label+'</label>'
+        +'<input class="detail-input" id="detail-input-'+fd.key+'" value="'+escAttr(val)+'" placeholder="'+ph+'">'
+        +'<div><button class="detail-save" onclick="saveDetailField(\''+fd.key+'\')">Save</button>'
         +'<button class="detail-cancel" onclick="cancelDetailField()">Cancel</button></div></div>';
     }
     var display;
     if(!val){
       display='<span class="detail-empty">Not added yet</span>';
-    }else if(f.type==='url'){
+    }else if(fd.type==='pdf'){
+      display='<a class="pdf-btn" href="'+escAttr(val)+'" target="_blank" rel="noopener">View PDF ↗</a>';
+    }else if(fd.type==='url'){
       display='<a href="'+escAttr(val)+'" target="_blank" rel="noopener">'+escHtml(val)+'</a>';
     }else{
       display='<span class="slack-chip">'+escHtml(val)+'</span>';
     }
-    return '<div class="detail-field"><label class="detail-label">'+f.label+'</label>'
+    return '<div class="detail-field"><label class="detail-label">'+fd.label+'</label>'
       +'<div class="detail-val">'+display
-      +'<button class="detail-edit-btn" onclick="startDetailField(\''+f.key+'\')">Edit</button></div></div>';
+      +'<button class="detail-edit-btn" onclick="startDetailField(\''+fd.key+'\')">Edit</button></div></div>';
   }).join('');
 }
 function startDetailField(key){
@@ -386,52 +418,60 @@ function cancelDetailField(){
   renderDetail();
 }
 function saveDetailField(key){
-  var r=releases.find(function(x){return x.id===activeRelId;});if(!r)return;
+  var f=data[activeSection].find(function(x){return x.id===activeFeatId;});if(!f)return;
   var input=document.getElementById('detail-input-'+key);
-  r[key]=input.value.trim();
-  markDirty();
+  f[key]=input.value.trim();
+  persist();
   editingField=null;
   renderDetail();
 }
-function deleteRelease(){
-  if(!activeRelId)return;
-  if(!confirm('Delete this release from the tracker?'))return;
-  releases=releases.filter(function(x){return x.id!==activeRelId;});
-  markDirty();
-  activeRelId=null;
+function deleteFeature(){
+  if(!activeFeatId)return;
+  if(!confirm('Delete this feature from the tracker?'))return;
+  data[activeSection]=data[activeSection].filter(function(x){return x.id!==activeFeatId;});
+  persist();
+  var sec=activeSection;
+  activeFeatId=null;
   closeModal('detail-modal');
-  renderReleases();
+  renderSection(sec);
 }
 
-// ── ADD RELEASE ───────────────────────────────────────────────────────────────
-function openRelModal(){
-  ['rel-title-input','rel-video-input','rel-notes-input','rel-sheet-input','rel-slack-input'].forEach(function(id){
+// ── ADD FEATURE ───────────────────────────────────────────────────────────────
+function openAddModal(section){
+  addTargetSection=section;
+  ['add-title-input','add-video-input','add-notes-input','add-sheet-input','add-slack-input'].forEach(function(id){
     document.getElementById(id).value='';
   });
-  document.getElementById('rel-modal').classList.add('open');
+  // Release notes field only applies to the releases tab
+  document.getElementById('add-notes-row').style.display=(section==='releases')?'block':'none';
+  document.getElementById('add-modal').classList.add('open');
 }
-function saveNewRelease(){
-  var title=document.getElementById('rel-title-input').value.trim();
+function saveNewFeature(){
+  var title=document.getElementById('add-title-input').value.trim();
   if(!title)return;
+  var cfg=SECTIONS[addTargetSection];
   var status={};
-  NETWORKS.forEach(function(n){status[n]={color:"gray",note:""};});
-  releases.push({
+  cfg.columns.forEach(function(c){status[c]={color:"gray",note:""};});
+  var item={
     id:uid(),
     title:title,
-    video:document.getElementById('rel-video-input').value.trim(),
-    notes:document.getElementById('rel-notes-input').value.trim(),
-    sheet:document.getElementById('rel-sheet-input').value.trim(),
-    slack:document.getElementById('rel-slack-input').value.trim(),
+    video:document.getElementById('add-video-input').value.trim(),
+    sheet:document.getElementById('add-sheet-input').value.trim(),
+    slack:document.getElementById('add-slack-input').value.trim(),
     status:status
-  });
-  markDirty();
-  closeModal('rel-modal');
-  renderReleases();
+  };
+  if(addTargetSection==='releases'){
+    item.notes=document.getElementById('add-notes-input').value.trim();
+  }
+  data[addTargetSection].push(item);
+  persist();
+  closeModal('add-modal');
+  renderSection(addTargetSection);
 }
 
 // ── PUBLISH / EXPORT ──────────────────────────────────────────────────────────
 function openExportModal(){
-  var payload={updatedAt:new Date().toISOString(),releases:releases};
+  var payload={updatedAt:new Date().toISOString(),releases:data.releases,dev:data.dev};
   document.getElementById('export-area').value=JSON.stringify(payload,null,1);
   document.getElementById('export-modal').classList.add('open');
 }
