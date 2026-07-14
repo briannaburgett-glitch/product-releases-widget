@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Releases</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#efefec;
+  --text:#1a1a18;--text2:#6b6b66;--text3:#9b9b95;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --blue-bg:#E6F1FB;--blue:#185FA5;--blue-dark:#0C447C;
+  --amber-bg:#FAEEDA;--amber:#854F0B;
+  --green-bg:#EAF3DE;--green:#3B6D11;
+  --purple-bg:#EEEDFE;--purple:#3C3489;
+  --red:#E24B4A;--yellow:#EF9F27;--pmf-green:#639922;
+  --dot-green:#639922;--dot-orange:#EF9F27;--dot-red:#E24B4A;--dot-gray:#9b9b95;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#242422;--bg3:#2c2c2a;
+  --text:#f0efe8;--text2:#a0a09a;--text3:#686862;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
+  --blue-bg:#0c2a42;--blue:#85B7EB;--blue-dark:#B5D4F4;
+  --amber-bg:#3a2800;--amber:#FAC775;
+  --green-bg:#1a2e0a;--green:#C0DD97;
+  --purple-bg:#1e1a40;--purple:#AFA9EC;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:1.25rem;font-size:14px;line-height:1.6;}
+.tab-bar{display:flex;gap:2px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--border);}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border:none;border-bottom:2px solid transparent;background:none;margin-bottom:-1px;}
+.tab.active{color:var(--text);border-bottom-color:#378ADD;}
+.tab:hover{color:var(--text);}
+.panel{display:none;}.panel.active{display:block;}
+.section-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:.5rem;}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;}
+.toolbar-btns{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.add-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:none;background:#378ADD;color:#fff;cursor:pointer;}
+.ghost-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;}
+.ghost-btn:hover{color:var(--text);}
+.sync-badge{font-size:9px;padding:2px 9px;border-radius:14px;font-weight:500;}
+.sync-clean{background:var(--green-bg);color:var(--green);}
+.sync-dirty{background:var(--amber-bg);color:var(--amber);}
+.rel-desc{font-size:12px;color:var(--text2);line-height:1.7;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border);padding:.9rem 1rem;margin-bottom:1.25rem;}
+/* Release grid */
+.rel-header{display:grid;grid-template-columns:minmax(180px,1fr) repeat(4,90px);gap:8px;align-items:center;padding:0 4px 8px;border-bottom:0.5px solid var(--border);margin-bottom:4px;}
+.rel-header .net-label{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);text-align:center;}
+.rel-row{display:grid;grid-template-columns:minmax(180px,1fr) repeat(4,90px);gap:8px;align-items:center;padding:10px 4px;border-bottom:0.5px solid var(--border);}
+.rel-row:hover{background:var(--bg2);}
+.rel-pill{font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:0.5px solid transparent;cursor:pointer;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rel-pill:hover{border-color:var(--blue);}
+.dot-cell{display:flex;justify-content:center;}
+.status-dot-lg{width:18px;height:18px;border-radius:50%;cursor:pointer;position:relative;transition:transform .1s;}
+.status-dot-lg:hover{transform:scale(1.2);}
+.dot-has-note::after{content:"";position:absolute;bottom:-2px;right:-2px;width:6px;height:6px;border-radius:50%;background:var(--text3);border:1px solid var(--bg);}
+.rel-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:1rem;}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);}
+.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.empty-state{text-align:center;padding:2.5rem;color:var(--text2);font-size:12px;}
+/* Detail modal fields */
+.detail-field{margin-bottom:.9rem;}
+.detail-label{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin-bottom:4px;display:block;}
+.detail-val{font-size:12px;line-height:1.6;}
+.detail-val a{color:var(--blue);text-decoration:none;word-break:break-all;}
+.detail-val a:hover{text-decoration:underline;}
+.detail-empty{color:var(--text3);font-style:italic;font-size:11px;}
+.detail-edit-btn{font-size:9px;padding:2px 8px;border-radius:14px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;margin-left:6px;vertical-align:middle;}
+.detail-input{width:100%;font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;margin-top:3px;}
+.detail-input:focus{outline:none;border-color:#378ADD;}
+.detail-save{font-size:10px;padding:3px 10px;border-radius:14px;border:none;background:#378ADD;color:#fff;cursor:pointer;margin-top:4px;margin-right:4px;}
+.detail-cancel{font-size:10px;padding:3px 10px;border-radius:14px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;margin-top:4px;}
+.slack-chip{display:inline-block;font-size:11px;padding:2px 9px;border-radius:14px;background:var(--purple-bg);color:var(--purple);font-weight:500;}
+/* Status popup */
+.color-picker{display:flex;gap:10px;margin:8px 0 12px;}
+.color-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.color-opt.sel{border-color:var(--text);}
+.status-note-area{width:100%;font-size:12px;line-height:1.6;padding:6px 9px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;resize:vertical;min-height:60px;}
+.status-note-area:focus{outline:none;border-color:#378ADD;}
+/* Modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.5rem;width:460px;max-width:95vw;border:0.5px solid var(--border2);max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:1rem;}
+.modal-sub{font-size:10px;color:var(--text2);margin-top:-0.75rem;margin-bottom:1rem;}
+.form-row{margin-bottom:.75rem;}
+.form-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:3px;display:block;}
+.form-input{width:100%;font-size:12px;padding:6px 9px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;}
+.form-input:focus{outline:none;border-color:#378ADD;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;}
+.btn-cancel{font-size:12px;padding:5px 14px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;}
+.btn-save{font-size:12px;padding:5px 14px;border-radius:20px;border:none;background:#378ADD;color:#fff;cursor:pointer;}
+.btn-danger{font-size:12px;padding:5px 14px;border-radius:20px;border:none;background:var(--red);color:#fff;cursor:pointer;margin-right:auto;}
+.export-area{width:100%;font-size:10px;font-family:monospace;padding:8px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);min-height:140px;resize:vertical;}
+@media(max-width:600px){
+  .rel-header,.rel-row{grid-template-columns:minmax(110px,1fr) repeat(4,44px);gap:4px;}
+  .rel-pill{font-size:11px;padding:4px 10px;}
+}
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <button class="tab active" id="tab-btn-releases" onclick="showTab('releases',this)">Recent Releases</button>
+</div>
+
+<!-- RELEASES -->
+<div id="tab-releases" class="panel active">
+  <div class="toolbar">
+    <span class="section-label" style="margin:0;">Significant product releases - network availability</span>
+    <div class="toolbar-btns">
+      <span class="sync-badge sync-clean" id="sync-badge" style="display:none;"></span>
+      <button class="ghost-btn" onclick="openExportModal()">Publish / Export</button>
+      <button class="ghost-btn" onclick="resetToPublished()">Reset</button>
+      <button class="add-btn" onclick="openRelModal()">+ Add release</button>
+    </div>
+  </div>
+  <div class="rel-desc">Tracks each significant product release and its live status across networks. Click a release name for the demo video, release notes, marketing slick sheet, and Slack feedback channel. Click any status dot to update its color or add a status note. Edits are local until published; use Publish / Export to update the shared view for everyone.</div>
+  <div class="rel-table">
+    <div class="rel-header">
+      <span class="section-label" style="margin:0;">Release</span>
+      <span class="net-label">App</span>
+      <span class="net-label">NIPR</span>
+      <span class="net-label">SIPR</span>
+      <span class="net-label">JWICS</span>
+    </div>
+    <div id="rel-list"></div>
+  </div>
+  <div class="rel-legend">
+    <div class="li"><div class="ld" style="background:var(--dot-green);"></div>Live</div>
+    <div class="li"><div class="ld" style="background:var(--dot-orange);"></div>In progress / delayed</div>
+    <div class="li"><div class="ld" style="background:var(--dot-red);"></div>Blocked / not available</div>
+    <div class="li"><div class="ld" style="background:var(--dot-gray);"></div>Not set / N/A</div>
+  </div>
+</div>
+
+<!-- RELEASE DETAIL MODAL -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal">
+    <h3 id="detail-title">Release details</h3>
+    <div class="modal-sub">Click Edit next to any field to update it.</div>
+    <div id="detail-fields"></div>
+    <div class="modal-actions">
+      <button class="btn-danger" onclick="deleteRelease()">Delete release</button>
+      <button class="btn-cancel" onclick="closeModal('detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS DOT MODAL -->
+<div class="modal-backdrop" id="status-modal">
+  <div class="modal" style="width:380px;">
+    <h3 id="status-title">Update status</h3>
+    <label class="form-label">Status color</label>
+    <div class="color-picker" id="color-picker"></div>
+    <label class="form-label">Status note</label>
+    <textarea class="status-note-area" id="status-note" placeholder="e.g. Delayed due to CtF, target date, blockers..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('status-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveStatus()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RELEASE MODAL -->
+<div class="modal-backdrop" id="rel-modal">
+  <div class="modal">
+    <h3>Add release</h3>
+    <div class="form-row"><label class="form-label">Release title</label><input class="form-input" id="rel-title-input" placeholder="e.g. AI Assist v2"></div>
+    <div class="form-row"><label class="form-label">Demo video URL (optional)</label><input class="form-input" id="rel-video-input" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">Release notes URL (optional)</label><input class="form-input" id="rel-notes-input" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">Marketing slick sheet URL (optional)</label><input class="form-input" id="rel-sheet-input" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">Slack channel (optional)</label><input class="form-input" id="rel-slack-input" placeholder="#release-feedback"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('rel-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveNewRelease()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-backdrop" id="export-modal">
+  <div class="modal">
+    <h3>Publish your edits</h3>
+    <div class="modal-sub">This JSON is your current working copy. To publish it for everyone: copy it, open data.json in the GitHub repo, replace the entire file contents, and commit. The embed updates for all viewers within a couple of minutes.</div>
+    <textarea class="export-area" id="export-area" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('export-modal')">Close</button>
+      <button class="btn-save" onclick="copyExport()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+var NETWORKS=["App","NIPR","SIPR","JWICS"];
+var COLORS=["green","orange","red","gray"];
+var COLOR_VALS={green:"var(--dot-green)",orange:"var(--dot-orange)",red:"var(--dot-red)",gray:"var(--dot-gray)"};
+var LS_KEY='prodrel_local';
+
+// Fallback only used if data.json cannot be fetched (e.g. local file preview)
+var FALLBACK={
+  updatedAt:"2026-07-13T00:00:00Z",
+  releases:[
+    {id:"r1",title:"Foundry Integration",video:"",notes:"",sheet:"",slack:"",
+     status:{"App":{color:"green",note:""},"NIPR":{color:"green",note:""},"SIPR":{color:"green",note:""},"JWICS":{color:"red",note:"Delayed due to CtF"}}},
+    {id:"r2",title:"POAM",video:"",notes:"",sheet:"",slack:"",
+     status:{"App":{color:"green",note:""},"NIPR":{color:"green",note:""},"SIPR":{color:"orange",note:"Delayed due to CtF"},"JWICS":{color:"orange",note:"Delayed due to CtF"}}}
+  ]
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var releases=[];
+var publishedVersion=null;   // updatedAt of the data.json this session is based on
+var isDirty=false;           // local edits not yet published
+var activeRelId=null;
+var editingField=null;
+var statusTarget=null;
+var statusColorSel=null;
+
+function lsGet(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function uid(){return 'id'+Date.now()+Math.floor(Math.random()*9999);}
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+
+document.querySelectorAll(".modal-backdrop").forEach(function(m){
+  m.addEventListener("click",function(e){if(e.target===m)m.classList.remove("open");});
+});
+
+// ── DATA LOADING ──────────────────────────────────────────────────────────────
+// Published truth lives in data.json (committed to the repo).
+// Local unpublished edits live in localStorage as {baseVersion, releases}.
+// Rules: if local edits are based on the current published version, keep them.
+// If published has moved on (new commit), adopt published and drop stale local copy.
+function boot(published){
+  publishedVersion=published.updatedAt||null;
+  var local=lsGet(LS_KEY,null);
+  if(local&&local.baseVersion===publishedVersion&&Array.isArray(local.releases)){
+    releases=local.releases;
+    isDirty=true;
+  }else{
+    releases=published.releases||[];
+    lsDel(LS_KEY);
+    isDirty=false;
+  }
+  renderReleases();
+  renderSyncBadge();
+}
+
+fetch('./data.json?t='+Date.now())
+  .then(function(r){if(!r.ok)throw new Error('fetch failed');return r.json();})
+  .then(function(data){boot(data);})
+  .catch(function(){boot(FALLBACK);});
+
+function markDirty(){
+  isDirty=true;
+  lsSet(LS_KEY,{baseVersion:publishedVersion,releases:releases});
+  renderSyncBadge();
+}
+function renderSyncBadge(){
+  var b=document.getElementById('sync-badge');
+  b.style.display='inline-block';
+  if(isDirty){
+    b.className='sync-badge sync-dirty';
+    b.textContent='Unpublished edits';
+  }else{
+    b.className='sync-badge sync-clean';
+    b.textContent='In sync with published';
+  }
+}
+function resetToPublished(){
+  if(isDirty&&!confirm('Discard your local unpublished edits and reload the published version?'))return;
+  lsDel(LS_KEY);
+  location.reload();
+}
+
+// ── TAB NAV ───────────────────────────────────────────────────────────────────
+function showTab(name,btn){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
+  document.getElementById("tab-"+name).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ── RELEASE GRID ──────────────────────────────────────────────────────────────
+function renderReleases(){
+  var el=document.getElementById('rel-list');
+  if(!releases.length){
+    el.innerHTML='<div class="empty-state">No releases tracked yet.<br>Hit "+ Add release" to add your first one.</div>';
+    return;
+  }
+  el.innerHTML=releases.map(function(r){
+    var dots=NETWORKS.map(function(n){
+      var st=(r.status&&r.status[n])||{color:"gray",note:""};
+      var noteCls=st.note?' dot-has-note':'';
+      return '<div class="dot-cell"><div class="status-dot-lg'+noteCls+'" style="background:'+COLOR_VALS[st.color]+';" '
+        +'onclick="openStatusModal(\''+r.id+'\',\''+n+'\')" title="'+escAttr(st.note||n+' status')+'"></div></div>';
+    }).join('');
+    return '<div class="rel-row">'
+      +'<div><span class="rel-pill" onclick="openDetailModal(\''+r.id+'\')">'+escHtml(r.title)+'</span></div>'
+      +dots
+      +'</div>';
+  }).join('');
+}
+
+// ── STATUS MODAL ──────────────────────────────────────────────────────────────
+function openStatusModal(relId,network){
+  var r=releases.find(function(x){return x.id===relId;});if(!r)return;
+  statusTarget={relId:relId,network:network};
+  var st=(r.status&&r.status[network])||{color:"gray",note:""};
+  statusColorSel=st.color;
+  document.getElementById('status-title').textContent=r.title+' - '+network;
+  document.getElementById('status-note').value=st.note||'';
+  renderColorPicker();
+  document.getElementById('status-modal').classList.add('open');
+}
+function renderColorPicker(){
+  var el=document.getElementById('color-picker');
+  el.innerHTML=COLORS.map(function(c){
+    return '<div class="color-opt'+(c===statusColorSel?' sel':'')+'" style="background:'+COLOR_VALS[c]+';" onclick="selectColor(\''+c+'\')"></div>';
+  }).join('');
+}
+function selectColor(c){
+  statusColorSel=c;
+  renderColorPicker();
+}
+function saveStatus(){
+  var r=releases.find(function(x){return x.id===statusTarget.relId;});if(!r)return;
+  if(!r.status)r.status={};
+  r.status[statusTarget.network]={color:statusColorSel,note:document.getElementById('status-note').value.trim()};
+  markDirty();
+  closeModal('status-modal');
+  renderReleases();
+}
+
+// ── DETAIL MODAL ──────────────────────────────────────────────────────────────
+var FIELD_DEFS=[
+  {key:"video",label:"Demo Video",type:"url"},
+  {key:"notes",label:"Release Notes",type:"url"},
+  {key:"sheet",label:"Marketing Slick Sheet (approved for external use)",type:"url"},
+  {key:"slack",label:"Slack Channel for Questions / Feedback",type:"text"}
+];
+
+function openDetailModal(relId){
+  activeRelId=relId;
+  editingField=null;
+  renderDetail();
+  document.getElementById('detail-modal').classList.add('open');
+}
+function renderDetail(){
+  var r=releases.find(function(x){return x.id===activeRelId;});if(!r)return;
+  document.getElementById('detail-title').textContent=r.title;
+  var el=document.getElementById('detail-fields');
+  el.innerHTML=FIELD_DEFS.map(function(f){
+    var val=r[f.key]||'';
+    if(editingField===f.key){
+      return '<div class="detail-field"><label class="detail-label">'+f.label+'</label>'
+        +'<input class="detail-input" id="detail-input-'+f.key+'" value="'+escAttr(val)+'" placeholder="'+(f.type==='url'?'https://...':'#channel-name')+'">'
+        +'<div><button class="detail-save" onclick="saveDetailField(\''+f.key+'\')">Save</button>'
+        +'<button class="detail-cancel" onclick="cancelDetailField()">Cancel</button></div></div>';
+    }
+    var display;
+    if(!val){
+      display='<span class="detail-empty">Not added yet</span>';
+    }else if(f.type==='url'){
+      display='<a href="'+escAttr(val)+'" target="_blank" rel="noopener">'+escHtml(val)+'</a>';
+    }else{
+      display='<span class="slack-chip">'+escHtml(val)+'</span>';
+    }
+    return '<div class="detail-field"><label class="detail-label">'+f.label+'</label>'
+      +'<div class="detail-val">'+display
+      +'<button class="detail-edit-btn" onclick="startDetailField(\''+f.key+'\')">Edit</button></div></div>';
+  }).join('');
+}
+function startDetailField(key){
+  editingField=key;
+  renderDetail();
+  var input=document.getElementById('detail-input-'+key);
+  if(input)input.focus();
+}
+function cancelDetailField(){
+  editingField=null;
+  renderDetail();
+}
+function saveDetailField(key){
+  var r=releases.find(function(x){return x.id===activeRelId;});if(!r)return;
+  var input=document.getElementById('detail-input-'+key);
+  r[key]=input.value.trim();
+  markDirty();
+  editingField=null;
+  renderDetail();
+}
+function deleteRelease(){
+  if(!activeRelId)return;
+  if(!confirm('Delete this release from the tracker?'))return;
+  releases=releases.filter(function(x){return x.id!==activeRelId;});
+  markDirty();
+  activeRelId=null;
+  closeModal('detail-modal');
+  renderReleases();
+}
+
+// ── ADD RELEASE ───────────────────────────────────────────────────────────────
+function openRelModal(){
+  ['rel-title-input','rel-video-input','rel-notes-input','rel-sheet-input','rel-slack-input'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('rel-modal').classList.add('open');
+}
+function saveNewRelease(){
+  var title=document.getElementById('rel-title-input').value.trim();
+  if(!title)return;
+  var status={};
+  NETWORKS.forEach(function(n){status[n]={color:"gray",note:""};});
+  releases.push({
+    id:uid(),
+    title:title,
+    video:document.getElementById('rel-video-input').value.trim(),
+    notes:document.getElementById('rel-notes-input').value.trim(),
+    sheet:document.getElementById('rel-sheet-input').value.trim(),
+    slack:document.getElementById('rel-slack-input').value.trim(),
+    status:status
+  });
+  markDirty();
+  closeModal('rel-modal');
+  renderReleases();
+}
+
+// ── PUBLISH / EXPORT ──────────────────────────────────────────────────────────
+function openExportModal(){
+  var payload={updatedAt:new Date().toISOString(),releases:releases};
+  document.getElementById('export-area').value=JSON.stringify(payload,null,1);
+  document.getElementById('export-modal').classList.add('open');
+}
+function copyExport(){
+  var area=document.getElementById('export-area');
+  area.select();
+  var done=function(){alert('Copied. Now open data.json in the GitHub repo, replace the entire file contents with this, and commit.');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(area.value).then(done).catch(function(){document.execCommand('copy');done();});
+  }else{
+    document.execCommand('copy');done();
+  }
+}
+</script>
+</body>
+</html>
