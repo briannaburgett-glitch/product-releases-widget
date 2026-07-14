@@ -1,0 +1,33 @@
+{
+ "updatedAt": "2026-07-13T00:00:00Z",
+ "releases": [
+  {
+   "id": "r1",
+   "title": "Foundry Integration",
+   "video": "",
+   "notes": "",
+   "sheet": "",
+   "slack": "",
+   "status": {
+    "App": {"color": "green", "note": ""},
+    "NIPR": {"color": "green", "note": ""},
+    "SIPR": {"color": "green", "note": ""},
+    "JWICS": {"color": "red", "note": "Delayed due to CtF"}
+   }
+  },
+  {
+   "id": "r2",
+   "title": "POAM",
+   "video": "",
+   "notes": "",
+   "sheet": "",
+   "slack": "",
+   "status": {
+    "App": {"color": "green", "note": ""},
+    "NIPR": {"color": "green", "note": ""},
+    "SIPR": {"color": "orange", "note": "Delayed due to CtF"},
+    "JWICS": {"color": "orange", "note": "Delayed due to CtF"}
+   }
+  }
+ ]
+}
